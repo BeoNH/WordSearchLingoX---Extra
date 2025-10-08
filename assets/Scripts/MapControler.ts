@@ -39,7 +39,7 @@ export class MapControler extends Component {
     @property({ type: Label, tooltip: "Hiện thị số đáp án đúng" })
     public lbCorrectAnswer: Label = null;
     @property({ type: Label, tooltip: "Hiện thị chữ cái đang được bôi" })
-    public lbSelect: Label = null;
+    public lbSelect: Label = null; 
     @property({ type: Sprite, tooltip: "Ảnh đáp án được phóng to" })
     public imgZoomScale: Sprite = null;
     @property({ type: VideoPlayer, tooltip: "Video đáp án được phóng to" })
@@ -596,10 +596,10 @@ export class MapControler extends Component {
 
     /**
      * Cập nhật các từ được bôi trên màn hình
-     * @param input Chuỗi đầu vào cần chuyển đổi
+     * @param text Chuỗi đầu vào cần hiện
      */
     private updateSelectText(text: string){
-        
+        this.lbSelect.string = text;
     }
 
 
