@@ -66,8 +66,8 @@ export class APIManager extends Component {
     }
 
     public static urlParam(name) {
-        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
-        // var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec("/?gid=3248&url_stu=https://studio.lingox.co&url_api_stu=https://api-st.lingox.co&url_api=https://api-dev.lingox.co&publish=true&lang=en&url_api=[api-dev.lingox.co](http://api-dev.lingox.co/)&leaderboard=true&tournament=false&challenge=false&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxMyIsInVzZXJuYW1lIjoibXluYW1lMTIzIiwiZW1haWwiOm51bGwsImlzQ3JlYXRvcnMiOmZhbHNlLCJyYW5rIjoiQnJvbnplIiwiaWF0IjoxNzU5MzkwMDY4LCJleHAiOjE3NjA2ODYwNjh9.ADJ3pKAJYVymF3vlFY_hJC-YeoxAxM9lwvZDHR8QGgA");
+        // var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec("/?gid=3248&url_stu=https://studio.lingox.co&url_api_stu=https://api-st.lingox.co&url_api=https://api-dev.lingox.co&publish=true&lang=en&url_api=api-dev.lingox.co&leaderboard=true&tournament=false&challenge=false&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQwOCIsInVzZXJuYW1lIjoiVXNlcl80OTc1MDciLCJlbWFpbCI6bnVsbCwiaXNDcmVhdG9ycyI6ZmFsc2UsInJhbmsiOiJCcm9uemUiLCJpYXQiOjE3NTk5NDY3MDUsImV4cCI6MTc2MjUzODcwNX0.VWRox9qIW5q2VqXisSb3VwZSMaWZa8NDKy7zKBDdNxA");
         return (results !== null) ? results[1] || 0 : false;
     }
 }

@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventTouch, Input, input, instantiate, Label, Node, Prefab, Sprite, UITransform, Vec3, Graphics, tween, v3, assetManager, ImageAsset, SpriteFrame, Texture2D, Button, ScrollView, Vec2, AudioClip, AudioSource, game, VideoPlayer, VideoClip } from 'cc';
+import { _decorator, Color, Component, EventTouch, Input, input, instantiate, Label, Node, Prefab, Sprite, UITransform, Vec3, Graphics, tween, v3, assetManager, ImageAsset, SpriteFrame, Texture2D, Button, ScrollView, Vec2, AudioClip, AudioSource, game, VideoPlayer, VideoClip, animation, Animation } from 'cc';
 import { GameManager } from './GameManager';
 import { WordSearch } from './WordSearch';
 import { AudioController } from './AudioController';
@@ -38,8 +38,6 @@ export class MapControler extends Component {
     public answerScrollView: Node = null;
     @property({ type: Label, tooltip: "Hiện thị số đáp án đúng" })
     public lbCorrectAnswer: Label = null;
-    @property({ type: Label, tooltip: "Hiện thị chữ cái đang được bôi" })
-    public lbSelect: Label = null; 
     @property({ type: Sprite, tooltip: "Ảnh đáp án được phóng to" })
     public imgZoomScale: Sprite = null;
     @property({ type: VideoPlayer, tooltip: "Video đáp án được phóng to" })
@@ -78,6 +76,7 @@ export class MapControler extends Component {
         this.indexMap = indexMap;
         // GameManager.getRandomWordSet(indexMap);
 
+        this.registerEvents();
         this.resetGameState();
         this.initializeData();
         this.setupUI();
@@ -275,9 +274,9 @@ export class MapControler extends Component {
 
             // answer.image = 'https://cdn.pixabay.com/audio/2025/05/30/audio_d4653c551c.mp3';
             // answer.image = 'https://cdn.gamebatta.com/testvid-4493/movie.mp4';
-            
+
             // window["count"]= window["count"] || 0; 
-            
+
             // answer.image = window["count"]++ % 2 == 0 ? 'https://cdn.gamebatta.com/doc-9950/doc.mp4' : "https://cdn.gamebatta.com/testvid-4493/movie.mp4";
 
             // Gán dữ liệu media nếu có
@@ -291,7 +290,7 @@ export class MapControler extends Component {
                         const sp = img?.getComponent(Sprite);
                         if (sp) sp.spriteFrame = spriteFrame;
                         const rs = img?.getComponent(ImgResize);
-                        if(rs) rs.resize();
+                        if (rs) rs.resize();
 
                         img?.off("click");
                         img?.on("click", () => this.zoomScaleImage(null, i));
@@ -357,6 +356,9 @@ export class MapControler extends Component {
                 this.activeSelectionLine.setWorldPosition(this.touchStartPosition);
                 this.selectionDirection = null;
             }
+
+            WordSearch.Instance.lbSelect.string = '';
+            WordSearch.Instance.lbSelect.node.parent.active = true;
         }
     }
 
@@ -412,6 +414,7 @@ export class MapControler extends Component {
         else if (dx < 0 && dy > 0) { this.selectionDirection = 'diagonal-down-left'; angle = -135; }
 
         this.updateSelectionLine(this.activeSelectionLine, lineLength, angle);
+        this.updateSelectText();
     }
 
     /**
@@ -420,80 +423,6 @@ export class MapControler extends Component {
      * - Xóa màu highlight và đường kéo
      */
     onTouchEnd(event: EventTouch) {
-        this.selectedCells = [];
-        if (this.selectionDirection && this.selectionStep > 0) {
-            const len = this.grid.length;
-            switch (this.selectionDirection) {
-                case 'vertical-up':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let r = this.touchStartRow - i;
-                        if (r >= 0 && r < len) {
-                            this.selectedCells.push(this.grid[r][this.touchStartCol]);
-                        }
-                    }
-                    break;
-                case 'vertical-down':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let r = this.touchStartRow + i;
-                        if (r >= 0 && r < len) {
-                            this.selectedCells.push(this.grid[r][this.touchStartCol]);
-                        }
-                    }
-                    break;
-                case 'horizontal-right':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let c = this.touchStartCol + i;
-                        if (c >= 0 && c < len) {
-                            this.selectedCells.push(this.grid[this.touchStartRow][c]);
-                        }
-                    }
-                    break;
-                case 'horizontal-left':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let c = this.touchStartCol - i;
-                        if (c >= 0 && c < len) {
-                            this.selectedCells.push(this.grid[this.touchStartRow][c]);
-                        }
-                    }
-                    break;
-                case 'diagonal-up-right':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let r = this.touchStartRow - i;
-                        let c = this.touchStartCol + i;
-                        if (r >= 0 && r < len && c >= 0 && c < len) {
-                            this.selectedCells.push(this.grid[r][c]);
-                        }
-                    }
-                    break;
-                case 'diagonal-up-left':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let r = this.touchStartRow - i;
-                        let c = this.touchStartCol - i;
-                        if (r >= 0 && r < len && c >= 0 && c < len) {
-                            this.selectedCells.push(this.grid[r][c]);
-                        }
-                    }
-                    break;
-                case 'diagonal-down-right':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let r = this.touchStartRow + i;
-                        let c = this.touchStartCol + i;
-                        if (r >= 0 && r < len && c >= 0 && c < len) {
-                            this.selectedCells.push(this.grid[r][c]);
-                        }
-                    }
-                    break;
-                case 'diagonal-down-left':
-                    for (let i = 0; i <= this.selectionStep; i++) {
-                        let r = this.touchStartRow + i;
-                        let c = this.touchStartCol - i;
-                        if (r >= 0 && r < len && c >= 0 && c < len) {
-                            this.selectedCells.push(this.grid[r][c]);
-                        }
-                    }
-                    break;
-            }
-        }
         if (this.activeSelectionLine) {
             this.activeSelectionLine.active = false;
         }
@@ -504,6 +433,48 @@ export class MapControler extends Component {
 
 
     //=============== XỬ LÝ LOGIC GAME ===============//
+    /**
+     * Cập nhật các từ được bôi trên màn hình
+     */
+    private lastSelectKey = "";
+    private updateSelectText() {
+        if (!this.selectionDirection || this.selectionStep <= 0) return;
+
+        const len = this.grid.length;
+        const selectedCells: any[] = [];
+
+        let getCell = (r: number, c: number) => {
+            if (r >= 0 && r < len && c >= 0 && c < len) return this.grid[r][c];
+            return null;
+        };
+
+        for (let i = 0; i <= this.selectionStep; i++) {
+            let r = this.touchStartRow;
+            let c = this.touchStartCol;
+            switch (this.selectionDirection) {
+                case 'vertical-up': r -= i; break;
+                case 'vertical-down': r += i; break;
+                case 'horizontal-left': c -= i; break;
+                case 'horizontal-right': c += i; break;
+                case 'diagonal-up-right': r -= i; c += i; break;
+                case 'diagonal-up-left': r -= i; c -= i; break;
+                case 'diagonal-down-right': r += i; c += i; break;
+                case 'diagonal-down-left': r += i; c -= i; break;
+            }
+            const cell = getCell(r, c);
+            if (cell) selectedCells.push(cell);
+        }
+
+        // Cache lại kết quả để tránh render trùng
+        const newKey = selectedCells.map(c => c.letter).join('');
+        if (newKey !== this.lastSelectKey) {
+            this.lastSelectKey = newKey;
+            this.selectedCells = selectedCells;
+            WordSearch.Instance.lbSelect.string = newKey.split('').join(' ');
+        }
+    }
+
+
     /**
      * Kiểm tra từ vừa kéo có khớp với đáp án không và cập nhật UI
      */
@@ -567,8 +538,16 @@ export class MapControler extends Component {
         }
 
         console.log(checkWrong);
+        const node = WordSearch.Instance.lbSelect.node.parent;
+        //Nhấp nháy khi đúng
         if (checkWrong && this.node.active) {
             AudioController.Instance.timeOver_False();
+            node.active = false;
+        } else {
+            node.getComponent(Animation).play();
+            node.getComponent(Animation).once(Animation.EventType.FINISHED, () => {
+                node.active = false;
+            });
         }
     }
 
@@ -592,14 +571,6 @@ export class MapControler extends Component {
         const correctCount = this.discoveredWords.filter(found => found).length;
         const totalCount = this.discoveredWords.length;
         this.lbCorrectAnswer.string = `Words: ${correctCount}/${totalCount}`;
-    }
-
-    /**
-     * Cập nhật các từ được bôi trên màn hình
-     * @param text Chuỗi đầu vào cần hiện
-     */
-    private updateSelectText(text: string){
-        this.lbSelect.string = text;
     }
 
 
@@ -779,7 +750,14 @@ export class MapControler extends Component {
         //     .start();
     }
 
+    /**
+     * Hỗi trợ mở 1 từ gợi ý đầu tiên
+     */
+    onHintFirstWord() {
+        if(this.discoveredWords.every(found => found)) return;
 
+        
+    }
 
     //=============== XỬ LÝ KẾT THÚC MAP ===============//
     /**
@@ -816,11 +794,12 @@ export class MapControler extends Component {
                 const letterLabel = letterNode.addComponent(Label);
                 letterLabel.color = new Color(80, 124, 181);
                 letterLabel.string = cell.letter;
-                letterLabel.fontSize = 40;
-                letterLabel.lineHeight = 80;
+                letterLabel.fontSize = 60;
+                letterLabel.lineHeight = 60;
                 letterLabel.isBold = true;
                 letterLabel.enableOutline = true;
                 letterLabel.outlineColor = new Color(255, 255, 255);
+                letterLabel.outlineWidth = 3;
                 letterLabel.enableShadow = true;
                 letterLabel.shadowColor = new Color(56, 56, 56);
 

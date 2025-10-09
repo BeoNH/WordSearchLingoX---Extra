@@ -4,6 +4,7 @@ import { UIControler } from './UIControler';
 import { APIManager } from './APIManager';
 import { MapControler } from './MapControler';
 import { AudioController } from './AudioController';
+import { NumberScrolling } from './NumberScrolling';
 const { ccclass, property } = _decorator;
 
 /**
@@ -25,8 +26,8 @@ export class WordSearch extends Component {
     public timeLabel: Label = null;
     @property({ type: Label, tooltip: "Label hiển thị tổng thời gian" })
     public timeTotalLabel: Label = null;
-    @property({ type: Label, tooltip: "Label hiển thị điểm số" })
-    public scoreLabel: Label = null;
+    @property({ type: NumberScrolling, tooltip: "Label hiển thị điểm số" })
+    public scoreLabel: NumberScrolling = null;
     @property({ type: Node, tooltip: "Node chứa mode Time" })
     public modeTimeUI: Node = null;
     @property({ type: Node, tooltip: "Node chứa mode Page" })
@@ -35,6 +36,8 @@ export class WordSearch extends Component {
     public numPage: Label = null;
     @property({ type: Prefab, tooltip: "Map mẫu để sinh ra các map con" })
     public wordSearchMapPrefab: Prefab = null;
+    @property({ type: Label, tooltip: "Hiện thị chữ cái đang được bôi" })
+    public lbSelect: Label = null;
     @property({ type: Node, tooltip: "Màn chờ lúc chạy hiệu ứng" })
     public waitMask: Node = null;
     @property({ type: Node, tooltip: "Màn chờ lúc chạy ảnh và vid" })
@@ -55,7 +58,7 @@ export class WordSearch extends Component {
         speechSynthesis.getVoices();
 
         if (this.timeLabel) this.timeLabel.string = '0';
-        if (this.scoreLabel) this.scoreLabel.string = '0';
+        if (this.scoreLabel) this.scoreLabel.setValue(0);
     }
 
     protected onDisable(): void {
@@ -68,7 +71,7 @@ export class WordSearch extends Component {
             this.totalTimer = null;
         }
         if (this.timeLabel) this.timeLabel.string = '0';
-        if (this.scoreLabel) this.scoreLabel.string = '0';
+        if (this.scoreLabel) this.scoreLabel.setValue(0);
     }
 
     initGame() {
@@ -91,6 +94,7 @@ export class WordSearch extends Component {
         this.showMap(0);
 
         // Khởi tạo số liệu ban đầu
+        this.lbSelect.node.parent.active = false;
         this.currentScore = 0;
         this.totalTime = 0;
         this.remainingTime = GameManager.data.options.timeLimit;
@@ -155,7 +159,7 @@ export class WordSearch extends Component {
     public updateScoreDisplay(number) {
         const newScore = this.currentScore + number;
         this.currentScore = newScore >= 0 ? newScore : 0;
-        this.scoreLabel.string = `${this.currentScore}`;
+        this.scoreLabel.to(this.currentScore);
         if (this.currentScore > 0) this.showBonusEffect(number);
     }
 

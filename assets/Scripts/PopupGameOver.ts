@@ -85,6 +85,10 @@ export class PopupGameOver extends Component {
     }
 
     /**
+     * Chạy hiệu ứng trừ điểm dần
+     */
+
+    /**
      * Tính toán và trả về mốc điểm người chơi đạt được
      */
     private calculateAchievement(currentScore: number, totalQuestions: number) {
