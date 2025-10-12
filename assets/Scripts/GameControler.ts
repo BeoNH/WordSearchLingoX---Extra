@@ -29,7 +29,7 @@ export class GameControler extends Component {
         GameControler.Instance = this;
         window.addEventListener("beforeunload", this.onBeforeUnload);
 
-        this.sceneMenu.active = true;
+        this.sceneMenu.active = false;
         this.scenePlay.active = false;
         this.sceneLoadAsset.active = true;
 
@@ -48,16 +48,14 @@ export class GameControler extends Component {
             // GameManager.data = { ...GameManager.data, ...res.data };
             GameManager.data = { ...GameManager.data, ...res };
 
-            MenuControler.Instance.loadTopics(() => {
+            this.scheduleOnce(()=>{
                 this.sceneLoadAsset.active = false;
-            })
+            }, 0.01);
+
+            this.sceneMenu.active = true;
+
         });
     }
-    // protected start(): void {
-    //     MenuControler.Instance.loadTopics(() => {
-    //         this.sceneLoadAsset.active = false;
-    //     })
-    // }
 
     onDestroy() {
         window.removeEventListener("beforeunload", this.onBeforeUnload);
@@ -75,32 +73,38 @@ export class GameControler extends Component {
         // this.remainTurn();
     }
 
-    async openGame() {
+    async openGame(): Promise<void>  {
         AudioController.Instance.A_Click();
+
         let data = {
             "game_id": APIManager.GID,
             "publish": APIManager.urlParam(`publish`)
         }
 
-        // APIManager.requestData('GET', `/home-game-studio/client-game-studio-puzzle/${APIManager.urlParam(`gid`)}/?publish=${APIManager.urlParam(`publish`)}`, null, res => {
-        APIManager.requestData('POST', `/webhook/game/lingox-getQuestions`, data, res => {
-            if (!res) {
-                UIControler.instance.onMess(`Loading game data failed \n. . .\n ${res?.message}`);
-                return;
-            }
+        return new Promise((resolve, reject) =>{
+            // APIManager.requestData('GET', `/home-game-studio/client-game-studio-puzzle/${APIManager.urlParam(`gid`)}/?publish=${APIManager.urlParam(`publish`)}`, null, res => {
+            APIManager.requestData('POST', `/webhook/game/lingox-getQuestions`, data, res => {
+                if (!res) {
+                    UIControler.instance.onMess(`Loading game data failed \n. . .\n ${res?.message}`);
+                    reject();
+                    return;
+                }
+    
+                GameManager.data.questions = res.data.data;
+    
+                this.sceneMenu.active = false;
+                this.scenePlay.active = true;
+                WordSearch.Instance.initGame();
+    
+                console.log(GameManager.data);
+                resolve();
+            });
+    
+            // this.sceneMenu.active = false;
+            // this.scenePlay.active = true;
+            // WordSearch.Instance.initGame();
+        })
 
-            GameManager.data.questions = res.data.data;
-
-            this.sceneMenu.active = false;
-            this.scenePlay.active = true;
-            WordSearch.Instance.initGame();
-
-            console.log(GameManager.data)
-        });
-
-        // this.sceneMenu.active = false;
-        // this.scenePlay.active = true;
-        // WordSearch.Instance.initGame();
     }
 
 

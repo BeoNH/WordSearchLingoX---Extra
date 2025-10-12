@@ -357,8 +357,8 @@ export class MapControler extends Component {
                 this.selectionDirection = null;
             }
 
-            WordSearch.Instance.lbSelect.string = '';
             WordSearch.Instance.lbSelect.node.parent.active = true;
+            WordSearch.Instance.lbSelect.string = '';
         }
     }
 
@@ -366,7 +366,7 @@ export class MapControler extends Component {
      * Xử lý khi người chơi kéo
      * - Xác định hướng kéo
      * - Vẽ đường kéo
-     */
+    */
     onTouchMove(event: EventTouch) {
         if (this.touchStartRow < 0 || !this.activeSelectionLine) return;
 
@@ -754,9 +754,9 @@ export class MapControler extends Component {
      * Hỗi trợ mở 1 từ gợi ý đầu tiên
      */
     onHintFirstWord() {
-        if(this.discoveredWords.every(found => found)) return;
+        if (this.discoveredWords.every(found => found)) return;
 
-        
+
     }
 
     //=============== XỬ LÝ KẾT THÚC MAP ===============//
@@ -865,7 +865,7 @@ export class MapControler extends Component {
      * @returns Kích thước của ô
      */
     private getCellSize(): number {
-        const cellBackground = this.letterCell.data.getChildByPath('bg');
+        const cellBackground = this.letterCell.data.getChildByPath('BG');
         return cellBackground ? cellBackground.getComponent(UITransform).contentSize.width : 50;
     }
 

@@ -335,7 +335,7 @@ export class WordSearch extends Component {
         this.scheduleOnce(() => {
             this.onClick = false;
             AudioController.Instance.gameWin();
-            UIControler.instance.onOpen(null, 'over');
+            UIControler.instance.onOpen(null, 'over', this.currentScore);
         }, 0.5)
     }
 }

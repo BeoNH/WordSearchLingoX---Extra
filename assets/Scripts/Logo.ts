@@ -9,9 +9,8 @@ export class Logo extends Component {
     private readonly lineColors: Color[] = [new Color().fromHEX("#ffb42e"), new Color().fromHEX("#50baff"), new Color().fromHEX("#FF6B6B"), new Color().fromHEX("#4EFF92")];
 
 
-
     protected start(): void {
-
+        // this.scheduleOnce(()=>this.createTextLogo());
     }
 
     protected onDisable(): void {
@@ -25,23 +24,12 @@ export class Logo extends Component {
         console.log("logo animate");
         Tween.stopAllByTarget(this.node);
 
-        let maxWidth = 0;
-        this.node.getComponentsInChildren(Layout).forEach(e => {
-            e.node.children.forEach(e2 => {
-                Tween.stopAllByTarget(e2);
-                e2.position = new Vec3(e2.position.x, 0, 0);
-            });
-            e.updateLayout();
-            maxWidth = e.getComponent(UITransform).width;
-        });
-        this.node.getComponent(UITransform).width = maxWidth;
-        // this.node.getComponent(UIAspectRatioFitter).updateSize();
-
         if (this._callback)
             this.unschedule(this._callback);
         
         this._callback = () => {
             this.textNodes.forEach((e, i) => {
+                Tween.stopAllByTarget(e);
                 e.position = new Vec3(e.position.x, 0, 0);
 
                 this.scheduleOnce(() => {
@@ -61,7 +49,7 @@ export class Logo extends Component {
 
 
     onEnable() {
-        this.createTextLogo();
+        if(this.textNodes.length == 0) this.createTextLogo();
     }
 
     async createTextLogo() {
@@ -95,6 +83,7 @@ export class Logo extends Component {
                         }
 
                         nodeChar.getComponent(Label).string = char;
+                        nodeChar.getComponent(Label).updateRenderData();
                         nodeChar.getComponentInChildren(Label).string = char;
                         nodeChar.getComponentInChildren(Label).color = this.lineColors[i % this.lineColors.length];
                         nodeChar.active = true;

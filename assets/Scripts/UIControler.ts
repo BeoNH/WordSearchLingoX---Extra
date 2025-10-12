@@ -2,6 +2,7 @@ import { _decorator, Component, Label, Node } from 'cc';
 import { PopupSettingLevel } from './PopupSettingLevel';
 import { PopupGameOver } from './PopupGameOver';
 import { Popup } from './Popup';
+import { PopupProgressScore } from './PopupProgressScore';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIControler')
@@ -18,6 +19,8 @@ export class UIControler extends Component {
     // private popupHistory: Node = null;
     @property({ type: Node, tooltip: "Cài đặt cấp độ chơi" })
     private popupSettingLevel: Node = null;
+    @property({ type: Node, tooltip: "Thể hiện cấp độ chơi" })
+    private popupProgressScore: Node = null;
 
     @property({ type: Node, tooltip: "Xong game" })
     private popupGameOver: Node = null;
@@ -55,8 +58,12 @@ export class UIControler extends Component {
                 this.popupSettingLevel.getComponent(PopupSettingLevel).initSettingList();
                 break;
             case `over`:
-                this.popupGameOver.getComponent(Popup).onShow();
-                this.popupGameOver.getComponent(PopupGameOver).showGameOver();
+                this.popupProgressScore.getComponent(Popup).onShow();
+                this.popupProgressScore.getComponent(PopupProgressScore).runAnimScore(num, () => {
+                    this.popupProgressScore.active = false;
+                    this.popupGameOver.getComponent(Popup).onShow();
+                    this.popupGameOver.getComponent(PopupGameOver).showGameOver();
+                });
                 break;
             case `out`:
                 this.popupOutGame.getComponent(Popup).onShow();
@@ -74,6 +81,7 @@ export class UIControler extends Component {
         // this.popupRank.active = false;
         // this.popupHistory.active = false;
         this.popupSettingLevel.active = false;
+        this.popupProgressScore.active = false;
         this.popupGameOver.active = false;
         this.popupOutGame.active = false;
     }
