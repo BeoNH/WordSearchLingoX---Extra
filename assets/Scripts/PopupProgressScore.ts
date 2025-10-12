@@ -1,4 +1,4 @@
-import { _decorator, Animation, Component, Node, ProgressBar, tween, UITransform, v3 } from 'cc';
+import { _decorator, Animation, Component, instantiate, Node, ProgressBar, tween, UITransform, v3 } from 'cc';
 import { NumberScrolling } from './NumberScrolling';
 import { WordSearch } from './WordSearch';
 import { GameManager } from './GameManager';
@@ -35,6 +35,12 @@ export class PopupProgressScore extends Component {
             pos.x = 0;
             child.setPosition(pos);
         });
+        if (this.runStar) {
+            const chil = this.runStar.children;
+            for (let i = chil.length - 1; i >= 1; i--) {
+                chil[i].destroy();
+            }
+        }
     }
 
     public runAnimScore(currentScore: number, cb: Function) {
@@ -113,10 +119,20 @@ export class PopupProgressScore extends Component {
                 }, this.timeAnim * threshold / 100 + 0.01)
             }
 
-            this.runStar.children.forEach(()=>{
-                
-            })
-
+            let c = Math.floor(score / 5);
+            for (let i = 0; i < c; i++) {
+                const star = instantiate(this.runStar.children[0]);
+                star.active = true;
+                this.runStar.addChild(star);
+                this.scheduleOnce(() => {
+                    tween(star)
+                        .to(0.5, { worldPosition: this.progressBar.getWorldPosition() })
+                        .call(() => {
+                            star.destroy();
+                        })
+                        .start();
+                }, time / c * i)
+            }
         });
 
     }

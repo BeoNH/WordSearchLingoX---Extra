@@ -7892,7 +7892,7 @@
         "__id__": 250
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 312
@@ -8427,7 +8427,7 @@
       "__id__": 257
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 259
@@ -8526,7 +8526,7 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_useGrayscale": true,
+    "_useGrayscale": false,
     "_atlas": null,
     "_id": "60jYno3mhDqK8LmFVtDDh7"
   },
@@ -8540,7 +8540,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_clips": [
       {
         "__uuid__": "89925d67-e526-4c4f-a696-017a1379b861",
@@ -10386,6 +10386,9 @@
     },
     "boxTotalScore": {
       "__id__": 294
+    },
+    "runStar": {
+      "__id__": 257
     },
     "boxStar": {
       "__id__": 301
