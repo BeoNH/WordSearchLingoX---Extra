@@ -2,6 +2,7 @@ import { _decorator, Animation, Component, instantiate, Node, ProgressBar, tween
 import { NumberScrolling } from './NumberScrolling';
 import { WordSearch } from './WordSearch';
 import { GameManager } from './GameManager';
+import { AudioController } from './AudioController';
 const { ccclass, property } = _decorator;
 
 @ccclass('PopupProgressScore')
@@ -74,6 +75,7 @@ export class PopupProgressScore extends Component {
         const anim = node.getComponent(Animation);
         anim.play();
         anim.once(Animation.EventType.FINISHED, () => {
+            AudioController.Instance.barEnd(true);
 
             this.numScore.setTime(time);
             this.numScore.to(0);
@@ -87,6 +89,7 @@ export class PopupProgressScore extends Component {
                 .to(time, { progress: percent })
                 .call(() => {
                     this.scheduleOnce(() => {
+                        AudioController.Instance.barEnd(false);
                         cb();
                     }, 1)
                 })

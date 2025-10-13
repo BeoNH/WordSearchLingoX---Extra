@@ -42,6 +42,10 @@ export class WordSearch extends Component {
     public waitMask: Node = null;
     @property({ type: Node, tooltip: "Màn chờ lúc chạy ảnh và vid" })
     public blockMask: Node = null;
+    @property({ readonly: true, editorOnly: true, serializable: false })
+    private ITEM_GAME: string = "========== ITEM GAME ==========";
+    @property({ type: Prefab, tooltip: "Điểm được cộng/trừ mỗi lần trả lời" })
+    public bonusScore: Prefab = null;
 
     private mapNodes: Node[] = [];
     private currentMapIndex: number = 0;
@@ -98,7 +102,6 @@ export class WordSearch extends Component {
         this.currentScore = 0;
         this.totalTime = 0;
         this.remainingTime = GameManager.data.options.timeLimit;
-        this.updateScoreDisplay(this.currentScore);
         this.updateTimeDisplay();
 
         // Chế độ chơi
@@ -156,11 +159,10 @@ export class WordSearch extends Component {
     /**
      * Cập nhật hiển thị điểm số
      */
-    public updateScoreDisplay(number) {
+    public updateScoreDisplay(number, target?: Vec3) {
         const newScore = this.currentScore + number;
         this.currentScore = newScore >= 0 ? newScore : 0;
-        this.scoreLabel.to(this.currentScore);
-        if (this.currentScore > 0) this.showBonusEffect(number);
+        if (this.currentScore > 0) this.showBonusEffect(number, target);
     }
 
     public getDataGameOver() {
@@ -187,33 +189,40 @@ export class WordSearch extends Component {
     /**
      * Hiệu ứng cộng điểm
      */
-    private showBonusEffect(bonus: number, target?: Node) {
+    private showBonusEffect(bonus: number, target?: Vec3) {
         const OFFSET_Y1 = 80;
         const OFFSET_Y2 = 40;
-        const startPos = target ? target.getWorldPosition().clone() : this.scoreLabel.node.getWorldPosition().clone();
 
-        const initPos = bonus >= 0 ? startPos.clone().add(v3(0, -OFFSET_Y1, 0)) : startPos.clone().add(v3(0, -OFFSET_Y2, 0));
-        const targetPos = startPos.clone().add(v3(0, bonus >= 0 ? -OFFSET_Y2 : -OFFSET_Y1, 0));
+        const startPos = target ? target : this.scoreLabel.node.getWorldPosition().clone();
+        let initPos = bonus >= 0 ? startPos.clone().add(v3(0, -OFFSET_Y1, 0)) : startPos.clone().add(v3(0, -OFFSET_Y2, 0));
+        let targetPos = startPos.clone().add(v3(0, bonus >= 0 ? -OFFSET_Y2 : -OFFSET_Y1, 0));
+        
+        if(target){
+            initPos = target;
+            targetPos = this.scoreLabel.node.getWorldPosition().clone().add(v3(0, -OFFSET_Y2, 0));
+        }
 
-        const bonusNode = new Node("BonusEffect");
+        // const s = this.mapNodes[this.currentMapIndex].getChildByPath("")
+
+        const bonusNode = instantiate(this.bonusScore);
         bonusNode.parent = this.node;
         bonusNode.setWorldPosition(initPos);
 
-        const bonusLabel = bonusNode.addComponent(Label);
+        const bonusLabel = bonusNode.getComponentInChildren(Label);
         bonusLabel.string = bonus >= 0 ? `+${bonus}` : `${bonus}`;
-        bonusLabel.color = bonus >= 0 ? new Color(0, 255, 0) : new Color(255, 0, 0);
-        bonusLabel.fontSize = 40;
-        bonusLabel.lineHeight = 50;
+        bonusLabel.color = bonus >= 0 ? new Color(100, 255, 0) : new Color(255, 0, 0);
         bonusLabel.isBold = true;
         bonusLabel.enableOutline = true;
         bonusLabel.outlineColor = new Color(255, 255, 255);
-        bonusLabel.enableShadow = true;
-        bonusLabel.shadowColor = new Color(56, 56, 56);
+        bonusLabel.outlineWidth = 5;
 
+        const duration = Vec3.distance(initPos, targetPos) * 0.0005;
+        console.log(duration)
         tween(bonusNode)
-            .to(0.8, { worldPosition: targetPos })
+            .to(duration, { worldPosition: targetPos })
             .call(() => {
                 bonusNode.destroy();
+                this.scoreLabel.to(this.currentScore);
             })
             .start();
     }
@@ -334,7 +343,6 @@ export class WordSearch extends Component {
 
         this.scheduleOnce(() => {
             this.onClick = false;
-            AudioController.Instance.gameWin();
             UIControler.instance.onOpen(null, 'over', this.currentScore);
         }, 0.5)
     }

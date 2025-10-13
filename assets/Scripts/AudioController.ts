@@ -28,7 +28,7 @@ resources.load<AudioClip>("Sounds/silent", (err, data) => {
             // speech.volume = 1;
             speech.rate = 0.8; // Tốc độ đọc (1 là bình thường)
             // speech.pitch = 1; // Cao độ giọng đọc (1 là mặc 
-        
+
             window.speechSynthesis.cancel();
             window.speechSynthesis.speak(speech);
         };
@@ -47,15 +47,17 @@ export class AudioController extends Component {
     @property({ type: Node, tooltip: "iconInGame" })
     private iconGame: Node = null;
 
-    volume = 0;
+    volume = 1;
 
     protected onLoad(): void {
         AudioController.Instance = this;
+        this.Click();
     }
 
     Click() {
         this.volume == 1 ? this.volume = 0 : this.volume = 1;
-        this.node.children.forEach(e => e.getComponent(AudioSource).volume = this.volume)
+        // this.node.children.forEach(e => e.getComponent(AudioSource).volume = this.volume)
+        this.node.children[0].getComponent(AudioSource).volume = this.volume * 0.8;
     }
 
     protected update(dt: number): void {
@@ -71,8 +73,25 @@ export class AudioController extends Component {
         this.node.getChildByName("clear").getComponent(AudioSource).play();
     }
 
+    Wrong(){
+        const parent = this.node.getChildByName("wrong");
+        if (!parent || parent.children.length === 0) return;
+
+        const idx = Math.floor(Math.random() * parent.children.length);
+        const child = parent.children[idx];
+        const audio = child.getComponent(AudioSource);
+        if (audio) audio.play();
+    }
+
     Correct() {
         this.node.getChildByName("correct").getComponent(AudioSource).play();
+        // const parent = this.node.getChildByName("conect");
+        // if (!parent || parent.children.length === 0) return;
+
+        // const idx = Math.floor(Math.random() * parent.children.length);
+        // const child = parent.children[idx];
+        // const audio = child.getComponent(AudioSource);
+        // if (audio) audio.play();
     }
 
     timeOver_False() {
@@ -85,6 +104,14 @@ export class AudioController extends Component {
 
     gameOver() {
         this.node.getChildByName("game_over").getComponent(AudioSource).play();
+    }
+
+    barEnd(is: boolean) {
+        if(is){
+            this.node.getChildByName("bar_end_game").getComponent(AudioSource).play();
+        }else{
+            this.node.getChildByName("bar_end_game").getComponent(AudioSource).stop();
+        }
     }
 
 }

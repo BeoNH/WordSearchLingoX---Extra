@@ -7,6 +7,7 @@ import { APIManager } from './APIManager';
 import { UIControler } from './UIControler';
 import { Popup } from './Popup';
 import { GameControler } from './GameControler';
+import { AudioController } from './AudioController';
 const { ccclass, property } = _decorator;
 
 @ccclass('PopupGameOver')
@@ -105,12 +106,14 @@ export class PopupGameOver extends Component {
         const labelScore = this.resultNode.getChildByPath(`Score/LabelScore`).getComponent(Label);
 
         if (currentScore >= threshold) {
+            AudioController.Instance.gameWin();
             emoji.setAnimation(0, `WOW`);
             missingPoint.active = false;
             confenti.active = true;
             labelScore.string = `LEGENDARY`;
             this.resultNode.getComponent(Sprite).color = new Color().fromHEX(`#CECE3C`);
         } else if (currentScore >= percentage) {
+            AudioController.Instance.gameWin();
             emoji.setAnimation(0, `FUNNY`);
             missingPoint.active = true;
             missingPoint.getChildByPath(`LabelScoreMiss`).getComponent(Label).string = `+${(threshold - currentScore).toFixed(2)}`;
@@ -119,6 +122,7 @@ export class PopupGameOver extends Component {
             labelScore.string = `COMPLETED`;
             this.resultNode.getComponent(Sprite).color = new Color().fromHEX(`#4BB7DA`);
         } else {
+            AudioController.Instance.gameOver();
             emoji.setAnimation(0, `SAD`);
             missingPoint.active = true;
             missingPoint.getChildByPath(`LabelScoreMiss`).getComponent(Label).string = `+${(percentage - currentScore).toFixed(2)}`;

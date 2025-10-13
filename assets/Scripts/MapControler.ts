@@ -501,6 +501,7 @@ export class MapControler extends Component {
 
             if (formattedAnswers[i] === forwardWord || formattedAnswers[i] === backwardWord) {
                 this.activeSelectionLine.active = true;
+                const posLine = this.activeSelectionLine.getWorldPosition().clone();
                 checkWrong = false;
 
                 // this.onReadWord(formattedAnswers[i]);
@@ -510,8 +511,8 @@ export class MapControler extends Component {
                 }
 
                 this.discoveredWords[i] = true;
+                WordSearch.Instance.updateScoreDisplay(GameManager.data.options.bonusScore, posLine);
                 AudioController.Instance.Correct();
-                WordSearch.Instance.updateScoreDisplay(GameManager.data.options.bonusScore);
                 this.updateCorrectAnswer();
 
                 this.scrollAnswerToCenter(i);
@@ -541,7 +542,8 @@ export class MapControler extends Component {
         const node = WordSearch.Instance.lbSelect.node.parent;
         //Nhấp nháy khi đúng
         if (checkWrong && this.node.active) {
-            AudioController.Instance.timeOver_False();
+            // AudioController.Instance.timeOver_False();
+            AudioController.Instance.Wrong();
             node.active = false;
         } else {
             node.getComponent(Animation).play();
