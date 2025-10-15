@@ -75,7 +75,7 @@ export class PopupProgressScore extends Component {
         const anim = node.getComponent(Animation);
         anim.play();
         anim.once(Animation.EventType.FINISHED, () => {
-            AudioController.Instance.barEnd(true);
+            if (score > 0) AudioController.Instance.barEnd(true);
 
             this.numScore.setTime(time);
             this.numScore.to(0);
@@ -122,14 +122,18 @@ export class PopupProgressScore extends Component {
                 }, this.timeAnim * threshold / 100 + 0.01)
             }
 
-            let c = Math.floor(score / 5);
+            let c = Math.floor(score / 2);
             for (let i = 0; i < c; i++) {
                 const star = instantiate(this.runStar.children[0]);
                 star.active = true;
                 this.runStar.addChild(star);
                 this.scheduleOnce(() => {
                     tween(star)
-                        .to(0.5, { worldPosition: this.progressBar.getWorldPosition() })
+                        .to(0.4, {
+                            worldPosition: this.progressBar.getWorldPosition().clone().add(v3(20, 0, 0)),
+                            scale: v3(2, 2, 2)
+                        }, { easing: 'quadOut' })
+                        .to(0.1, { scale: v3(1.3, 1.3, 1.3) })
                         .call(() => {
                             star.destroy();
                         })

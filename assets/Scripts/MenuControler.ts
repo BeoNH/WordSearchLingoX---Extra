@@ -32,6 +32,8 @@ export class MenuControler extends Component {
 
     protected onLoad(): void {
         MenuControler.Instance = this;
+
+        this.titleNode.children.forEach(child => child.active = false);
     }
 
     /**
@@ -91,8 +93,7 @@ export class MenuControler extends Component {
 
 
         // Load title_game
-        const loadTitle = new Promise<void>((resolve) => {
-            this.titleNode.children.forEach(child => child.active = false);
+        const loadTitle = new Promise<void>((resolve) => {    
 
             if ((linkTitle?.length ?? 0) > 0) {
                 GameControler.Instance.loadSpriteFrameFromUrl(linkTitle, sprt => {

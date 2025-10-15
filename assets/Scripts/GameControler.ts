@@ -29,7 +29,7 @@ export class GameControler extends Component {
         GameControler.Instance = this;
         window.addEventListener("beforeunload", this.onBeforeUnload);
 
-        this.sceneMenu.active = false;
+        this.sceneMenu.active = true;
         this.scenePlay.active = false;
         this.sceneLoadAsset.active = true;
 
@@ -48,12 +48,9 @@ export class GameControler extends Component {
             // GameManager.data = { ...GameManager.data, ...res.data };
             GameManager.data = { ...GameManager.data, ...res };
 
-            this.scheduleOnce(()=>{
+            MenuControler.Instance.loadTopics(()=>{
                 this.sceneLoadAsset.active = false;
-            }, 0.01);
-
-            this.sceneMenu.active = true;
-
+            })
         });
     }
 

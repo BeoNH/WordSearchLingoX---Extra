@@ -757,7 +757,7 @@ export class MapControler extends Component {
      */
     onHintFirstWord() {
         if (this.discoveredWords.every(found => found)) return;
-
+        
 
     }
 

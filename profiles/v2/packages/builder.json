@@ -21,7 +21,7 @@
         "progress": 1,
         "state": "success",
         "stage": "build",
-        "message": "10-13-2025 14:32:14 build success in 19 s!",
+        "message": "10-14-2025 14:43:29 build success in 19 s!",
         "detailMessage": "// ---- build task cocos-service：onAfterBuild ----\r",
         "options": {
           "name": "WordSearch",
@@ -83,7 +83,7 @@
             "enable": false
           }
         },
-        "time": "10-13-2025 14:31:55",
+        "time": "10-14-2025 14:43:10",
         "dirty": false
       }
     }
