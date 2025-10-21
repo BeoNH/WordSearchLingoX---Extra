@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventTouch, Input, input, instantiate, Label, Node, Prefab, Sprite, UITransform, Vec3, Graphics, tween, v3, assetManager, ImageAsset, SpriteFrame, Texture2D } from 'cc';
+import { _decorator, Color, Component, EventTouch, Input, input, instantiate, Label, Node, Prefab, Sprite, UITransform, Vec3, Graphics, tween, v3, assetManager, ImageAsset, SpriteFrame, Texture2D, Animation } from 'cc';
 import { GameManager } from './GameManager';
 import { UIControler } from './UIControler';
 import { APIManager } from './APIManager';
@@ -52,9 +52,14 @@ export class WordSearch extends Component {
     private totalTimer: number = null;
     private timeInterval: number = null;
     private isTransitioning: boolean = false;
+    private interval: number = 21; // Thời gian hiện tay chỉ gợi ý
+    private numHints: number = 0;
+
     public totalTime: number = 0;
     public remainingTime: number = 0;
     public currentScore: number = 0;
+    public isRunning = false; // Cho phép chạy update
+    public elapsed = 0; // Thời gian thực
 
 
     onLoad() {
@@ -78,12 +83,23 @@ export class WordSearch extends Component {
         if (this.scoreLabel) this.scoreLabel.setValue(0);
     }
 
+    protected update(dt: number): void {
+        if (!this.isRunning || this.numHints == 0) return;
+
+        this.elapsed += dt;
+        if (this.elapsed >= this.interval) {
+            this.elapsed = 0;
+            this.showUseHint();
+        }
+    }
+
     initGame() {
         // Xoá các map cũ nếu có
         this.mapNodes.forEach(node => node.destroy());
         this.mapNodes = [];
 
         // Tạo map mới
+        let num = 0;
         for (let i = 0; i < GameManager.data.questions.length; i++) {
             const mapNode = instantiate(this.wordSearchMapPrefab);
             mapNode.parent = this.node;
@@ -93,6 +109,8 @@ export class WordSearch extends Component {
 
             mapNode.active = (i === 0);
             this.mapNodes.push(mapNode);
+
+            num += Math.floor(GameManager.data.questions[i].answers.length / 2);
         }
         this.currentMapIndex = 0;
         this.showMap(0);
@@ -102,6 +120,9 @@ export class WordSearch extends Component {
         this.currentScore = 0;
         this.totalTime = 0;
         this.remainingTime = GameManager.data.options.timeLimit;
+        this.isRunning = true;
+        this.numHints = num;
+        this.node.getChildByPath(`btnHint/num`).getComponent(Label).string = `${num}`;
         this.updateTimeDisplay();
 
         // Chế độ chơi
@@ -154,6 +175,16 @@ export class WordSearch extends Component {
      */
     public updateTimeDisplay() {
         this.timeLabel.string = `${this.remainingTime}`;
+        if (this.remainingTime == 3) {
+            this.timeLabel.getComponent(Animation).play();
+            AudioController.Instance.timeEnd();
+        } else if (this.remainingTime == 0) {
+            // Chậm lại 1s cho mượn anim
+            this.scheduleOnce(() => {
+                this.timeLabel.getComponent(Animation).stop();
+                this.timeLabel.getComponent(Label).color = new Color().fromHEX("#405E92");
+            }, 1)
+        }
     }
 
     /**
@@ -184,6 +215,18 @@ export class WordSearch extends Component {
     }
 
 
+    /**
+     * Hiện thị hướng dẫn dùng gợi ý
+     */
+    public showUseHint() {
+        let finger = this.node.getChildByPath(`btnHint/zhishi_tex`);
+        finger.active = true;
+        finger.getComponent(Animation).play();
+        this.scheduleOnce(() => {
+            finger.active = false;
+            finger.getComponent(Animation).stop();
+        }, 3)
+    }
 
     //=============== XỬ LÝ HIỆU ỨNG HOẠT ẢNH ===============//
     /**
@@ -196,8 +239,8 @@ export class WordSearch extends Component {
         const startPos = target ? target : this.scoreLabel.node.getWorldPosition().clone();
         let initPos = bonus >= 0 ? startPos.clone().add(v3(0, -OFFSET_Y1, 0)) : startPos.clone().add(v3(0, -OFFSET_Y2, 0));
         let targetPos = startPos.clone().add(v3(0, bonus >= 0 ? -OFFSET_Y2 : -OFFSET_Y1, 0));
-        
-        if(target){
+
+        if (target) {
             initPos = target;
             targetPos = this.scoreLabel.node.getWorldPosition().clone().add(v3(0, -OFFSET_Y2, 0));
         }
@@ -311,6 +354,69 @@ export class WordSearch extends Component {
         UIControler.instance.onOpen(null, 'out', this.currentScore);
     }
 
+    // Hiện thị gợi ý
+    public onHintMap() {
+        if (this.numHints > 0) {
+            this.mapNodes[this.currentMapIndex].getComponent(MapControler).onHintFirstWord(() => {
+                this.numHints--;
+                this.node.getChildByPath(`btnHint/num`).getComponent(Label).string = `${this.numHints}`;
+
+                // hiệu ứng rơi chữ
+                const initPos = this.node.getChildByPath(`btnHint`).getWorldPosition().clone();
+                const targetPos = initPos.clone().add(v3(0, -80, 0));;
+                const minusNode = new Node("BonusEffect");
+                minusNode.parent = this.node;
+                minusNode.setWorldPosition(initPos);
+
+                const minusLabel = minusNode.addComponent(Label);
+                minusLabel.string = `-1`;
+                minusLabel.color = new Color(255, 0, 0);
+                minusLabel.fontSize = 50;
+                minusLabel.lineHeight = 60;
+                minusLabel.isBold = true;
+                minusLabel.enableOutline = true;
+                minusLabel.outlineColor = new Color(255, 255, 255);
+                minusLabel.enableShadow = true;
+                minusLabel.shadowColor = new Color(56, 56, 56);
+
+                tween(minusNode)
+                    .to(0.8, { worldPosition: targetPos })
+                    .call(() => {
+                        minusNode.destroy();
+                    })
+                    .start();
+
+
+                // hiệu ứng phóng to icon mờ dần
+                const clone = new Node("CloneIcon");
+                clone.parent = this.node;
+                clone.setPosition(Vec3.ZERO.clone().add(v3(0, 250, 0)));
+                clone.scale = v3(10, 10, 10);
+
+                const bgClone = clone.addComponent(Sprite);
+                bgClone.spriteFrame = this.node.getChildByPath(`btnHint`).getComponent(Sprite).spriteFrame;
+                bgClone.color = new Color(255, 255, 255, 150);
+
+                tween(clone)
+                    .to(
+                        0.8,
+                        {
+                            scale: new Vec3(0.2, 0.2, 0.2),
+                            worldScale: new Vec3(0.2, 0.2, 0.2), // fallback an toàn nếu scale local
+                        },
+                        {
+                            onUpdate: (target: Node, ratio: number) => {
+                                const alpha = Math.floor(204 * (1 - ratio));
+                                bgClone.color = new Color(255, 255, 255, alpha);
+                            },
+                        }
+                    )
+                    .call(() => clone.destroy())
+                    .start();
+            });
+        }
+    }
+
 
     //=============== XỬ LÝ KẾT THÚC GAME ===============//
     /**
@@ -320,6 +426,8 @@ export class WordSearch extends Component {
     public endGame(): void {
         if (this.onClick) return;
         this.onClick = true
+        this.isRunning = false;
+        this.numHints = 0;
         if (this.timeInterval) {
             clearInterval(this.timeInterval);
             this.timeInterval = null;

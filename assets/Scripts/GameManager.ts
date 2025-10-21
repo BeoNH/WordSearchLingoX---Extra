@@ -56,121 +56,42 @@ export class GameManager extends Component {
                         "value": "ARchAEOLOGIST",
                         "hint": "",
                         "image": "",
-                        "isHide": true
+                        "isHide": true,
+                        "location_hint": [3,4]
                     },
                     {
                         "value": "FARMER",
                         "hint": "",
                         "image": "",
-                        "isHide": true
+                        "isHide": true,
+                        "location_hint": [3,4]
                     },
                     {
                         "value": "POLICE",
                         "hint": "Keeps people safe and catches criminals",
                         "image": "",
-                        "isHide": false
+                        "isHide": false,
+                        "location_hint": [3,4]
                     },
                     {
                         "value": "ACTOR",
                         "hint": "",
                         "image": "",
-                        "isHide": false
+                        "isHide": false,
+                        "location_hint": [3,4]
                     },
                     {
                         "value": "DRIVER",
                         "hint": "",
                         "image": "",
-                        "isHide": false
+                        "isHide": false,
+                        "location_hint": [3,4]
                     }
                 ]
             },
             {
-                "matrixKey": [
-                    ["D", "O", "C", "T", "O", "R", "U", "K"],
-                    ["X", "B", "E", "J", "M", "R", "R", "T"],
-                    ["H", "T", "U", "W", "E", "E", "P", "E"],
-                    ["G", "L", "X", "C", "G", "Y", "O", "A"],
-                    ["F", "J", "N", "N", "P", "R", "L", "C"],
-                    ["G", "A", "I", "T", "F", "L", "I", "H"],
-                    ["D", "S", "Y", "X", "F", "Y", "C", "E"],
-                    ["P", "J", "O", "O", "N", "W", "E", "R"]
-                ],
-                "answers": [
-                    {
-                        "value": "TEACHER",
-                        "hint": "Works at school and helps students learn",
-                        "image": "",
-                        "isHide": true
-                    },
-                    {
-                        "value": "DOCTOR",
-                        "hint": "Helps sick people get better",
-                        "image": "",
-                        "isHide": false
-                    },
-                    {
-                        "value": "DANCER",
-                        "hint": "",
-                        "image": "",
-                        "isHide": true
-                    },
-                    {
-                        "value": "SINGER",
-                        "hint": "",
-                        "image": "",
-                        "isHide": false
-                    },
-                    {
-                        "value": "POLICE",
-                        "hint": "Keeps people safe and catches criminals",
-                        "image": "",
-                        "isHide": false
-                    }
-                ]
-            },
-            {
-                "matrixKey": [
-                    ["V", "F", "O", "Z", "G", "W", "S", "Q"],
-                    ["S", "I", "N", "G", "E", "R", "T", "N"],
-                    ["N", "V", "R", "H", "F", "S", "U", "U"],
-                    ["P", "O", "L", "I", "C", "E", "D", "R"],
-                    ["P", "Q", "P", "N", "Z", "Q", "E", "S"],
-                    ["A", "C", "T", "O", "R", "U", "N", "E"],
-                    ["H", "I", "W", "M", "U", "W", "T", "Y"],
-                    ["E", "F", "Z", "F", "T", "Z", "P", "E"]
-                ],
-                "answers": [
-                    {
-                        "value": "POLICE",
-                        "hint": "Keeps people safe and catches criminals",
-                        "image": "",
-                        "isHide": false
-                    },
-                    {
-                        "value": "NURSE",
-                        "hint": "Assists doctors and cares for patients",
-                        "image": "",
-                        "isHide": false
-                    },
-                    {
-                        "value": "ACTOR",
-                        "hint": "",
-                        "image": "",
-                        "isHide": false
-                    },
-                    {
-                        "value": "STUDENT",
-                        "hint": "Learns at school or college",
-                        "image": "",
-                        "isHide": true
-                    },
-                    {
-                        "value": "SINGER",
-                        "hint": "",
-                        "image": "",
-                        "isHide": false
-                    }
-                ]
+                "matrixKey":[],
+                "answers": []
             }
         ]
     };
@@ -203,13 +124,13 @@ export class GameManager extends Component {
      * Lấy ngẫu nhiên một bộ từ theo chủ đề
      * @returns Bộ từ ngẫu nhiên hoặc null nếu không tìm thấy chủ đề
      */
-    public static getRandomWordSet(index: number) {
-        console.log("selectedAnswers", this.answersFakeData)
-        if (!this.answersFakeData || this.answersFakeData.length < 5) return;
-        const shuffled = [...this.answersFakeData].sort(() => Math.random() - 0.5);
-        const selectedAnswers = shuffled.slice(0, 5);
-        this.data.questions[index].answers = selectedAnswers;
-    }
+    // public static getRandomWordSet(index: number) {
+    //     console.log("selectedAnswers", this.answersFakeData)
+    //     if (!this.answersFakeData || this.answersFakeData.length < 5) return;
+    //     const shuffled = [...this.answersFakeData].sort(() => Math.random() - 0.5);
+    //     const selectedAnswers = shuffled.slice(0, 5);
+    //     this.data.questions[index].answers = selectedAnswers;
+    // }
 
     /**
      * Tạo ma trận từ mảng các từ cho trước

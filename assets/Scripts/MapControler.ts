@@ -56,6 +56,7 @@ export class MapControler extends Component {
         hints: new Set<number>(),
         sounds: new Set<number>()
     };
+    public locationAnswers: number[][] = [];
     public wordAnswers: string[] = [];
     public discoveredWords: boolean[] = [];
 
@@ -106,6 +107,7 @@ export class MapControler extends Component {
         // Reset các biến trạng thái
         this.grid = [];
         this.selectedCells = [];
+        this.locationAnswers = [];
         this.wordAnswers = [];
         this.discoveredWords = [];
         this.touchStartRow = -1;
@@ -140,7 +142,8 @@ export class MapControler extends Component {
      * Khởi tạo dữ liệu game từ GameManager
      */
     private initializeData() {
-        this.wordAnswers = [...GameManager.data.questions[this.indexMap].answers.map(word => word.value.replace(/\s+/g, '').toUpperCase())];
+        this.wordAnswers = [...GameManager.data.questions[this.indexMap].answers.map(answers => answers.value.replace(/\s+/g, '').toUpperCase())];
+        this.locationAnswers = [...GameManager.data.questions[this.indexMap].answers.filter(a => a.location_hint).map(answers => answers.location_hint)];
         this.discoveredWords = new Array(this.wordAnswers.length).fill(false);
     }
 
@@ -510,8 +513,15 @@ export class MapControler extends Component {
                     console.log(this.usedFeatures.sounds, i);
                 }
 
+                if (!this.usedFeatures.hints.has(i)) {
+                    this.usedFeatures.hints.add(i);
+                }
+
+                this.selectedCells[0].node.getComponentInChildren(Sprite)!.color = Color.WHITE.clone();
+
                 this.discoveredWords[i] = true;
                 WordSearch.Instance.updateScoreDisplay(GameManager.data.options.bonusScore, posLine);
+                WordSearch.Instance.elapsed = 0;
                 AudioController.Instance.Correct();
                 this.updateCorrectAnswer();
 
@@ -755,10 +765,25 @@ export class MapControler extends Component {
     /**
      * Hỗi trợ mở 1 từ gợi ý đầu tiên
      */
-    onHintFirstWord() {
+    onHintFirstWord(cb: Function) {
+        if (this.locationAnswers.length == 0) return;
         if (this.discoveredWords.every(found => found)) return;
-        
 
+        const listIndex = this.discoveredWords
+            .map((e, i) => (!e && !this.usedFeatures.hints.has(i) ? i : -1))
+            .filter(i => i !== -1);
+
+        if (listIndex.length == 0) return;
+
+        const rIndex = listIndex[Math.floor(Math.random() * listIndex.length)];
+        this.usedFeatures.hints.add(rIndex);
+
+        const [c, r] = this.locationAnswers[rIndex];
+
+        const sprite = this.grid[r][c].node.getComponentInChildren(Sprite);
+        if (sprite) sprite.color = new Color().fromHEX("#00FFFF");
+
+        cb();
     }
 
     //=============== XỬ LÝ KẾT THÚC MAP ===============//

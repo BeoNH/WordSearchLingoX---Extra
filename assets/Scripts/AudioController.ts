@@ -98,6 +98,10 @@ export class AudioController extends Component {
         this.node.getChildByName("timeOver").getComponent(AudioSource).play();
     }
 
+    timeEnd() {
+        this.node.getChildByName("timing_end").getComponent(AudioSource).play();
+    }
+
     gameWin() {
         this.node.getChildByName("game-win").getComponent(AudioSource).play();
     }
