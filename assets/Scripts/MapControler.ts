@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventTouch, Input, input, instantiate, Label, Node, Prefab, Sprite, UITransform, Vec3, Graphics, tween, v3, assetManager, ImageAsset, SpriteFrame, Texture2D, Button, ScrollView, Vec2, AudioClip, AudioSource, game, VideoPlayer, VideoClip, animation, Animation } from 'cc';
+import { _decorator, Color, Component, EventTouch, Input, input, instantiate, Label, Node, Prefab, Sprite, UITransform, Vec3, Graphics, tween, v3, assetManager, ImageAsset, SpriteFrame, Texture2D, Button, ScrollView, Vec2, AudioClip, AudioSource, game, VideoPlayer, VideoClip, animation, Animation, Layout, Tween } from 'cc';
 import { GameManager } from './GameManager';
 import { WordSearch } from './WordSearch';
 import { AudioController } from './AudioController';
@@ -68,7 +68,8 @@ export class MapControler extends Component {
     private selectionStep = 0;
     private activeSelectionLine: Node = null;
     private _eventListenersInitialized = false;
-    private timeEffect = 0.3;
+    private timeEffect = 0.3; // Thòi gian chạy roll
+    private timeEffectStart = 1; // Thời gian chạy anim đầu game
 
 
 
@@ -199,6 +200,7 @@ export class MapControler extends Component {
             letter: letter
         })));
         const cellSize = this.getCellSize();
+        let time = 0.5;
 
         for (let i = 0; i < this.grid.length; i++) {
             for (let j = 0; j < this.grid[i].length; j++) {
@@ -208,13 +210,28 @@ export class MapControler extends Component {
 
                 const offset = (this.grid.length * cellSize) / 2 - cellSize / 2;
 
+                cellNode.active = this.indexMap !== 0;
                 cellNode.name = `${cellNode.name}_${i}_${j}`;
                 cellNode.parent = this.wordGrid;
                 cellNode.setPosition(j * cellSize - offset, offset - i * cellSize);
                 cellNode[`Key`] = this.grid[i][j].letter;
+                time += 0.015;
+
             }
         }
         this.adjustGridScale();
+
+        // chạy hiệu ứng map đầu tiên
+        WordSearch.Instance.waitMask.active = this.indexMap == 0;
+        this.timeEffectStart = time;
+        this.scheduleOnce(() => {
+            // if (this.indexMap == 0) {
+            //     this.scheduleOnce(() => {
+            //         AudioController.Instance.openGame();
+            //     }, 0.2)
+            // }
+            this.playCellsSequentially();
+        }, 0.2)
     }
 
     /**
@@ -257,7 +274,7 @@ export class MapControler extends Component {
             let label = item.getChildByPath(`Label`);
             label.active = !answer.isHide;
             label.getComponent(Label).string = this.convertToUnderscore(this.wordAnswers[i]);
-            label.getComponent(Label).color = new Color(80, 124, 181);
+            label.getComponent(Label).color = new Color(255, 247, 35);
 
             item["isHide"] = answer.isHide;
             item.active = true;
@@ -337,6 +354,8 @@ export class MapControler extends Component {
         for (let k = remCount; k < pool.length; k++) {
             pool[k].active = false;
         }
+
+        this.answerScrollView.getChildByPath("Effect").active = this.indexMap == 0;
     }
 
 
@@ -780,10 +799,16 @@ export class MapControler extends Component {
 
         const [c, r] = this.locationAnswers[rIndex];
 
-        const sprite = this.grid[r][c].node.getComponentInChildren(Sprite);
-        if (sprite) sprite.color = new Color().fromHEX("#00FFFF");
-
-        cb();
+        const cell = this.grid[r][c].node;
+        if (cell) {
+            cell.getComponentInChildren(Sprite).color = new Color().fromHEX("#fbaa39");
+            // Đợi chạy anim hint zoom xong.
+            this.scheduleOnce(() => {
+                cell.getComponent(Animation).play();
+            }, 0.6)
+        }
+        const pos = cell.getWorldPosition().clone();
+        cb(pos);
     }
 
     //=============== XỬ LÝ KẾT THÚC MAP ===============//
@@ -797,7 +822,7 @@ export class MapControler extends Component {
             this.activeSelectionLine.active = false;
         }
 
-        this.showAllAnswers();
+        // this.showAllAnswers();
         WordSearch.Instance.endGame();
     }
 
@@ -819,13 +844,13 @@ export class MapControler extends Component {
                 letterNode.setWorldPosition(cell.node.getWorldPosition());
 
                 const letterLabel = letterNode.addComponent(Label);
-                letterLabel.color = new Color(80, 124, 181);
+                letterLabel.color = new Color(255, 247, 35);
                 letterLabel.string = cell.letter;
                 letterLabel.fontSize = 60;
                 letterLabel.lineHeight = 60;
                 letterLabel.isBold = true;
                 letterLabel.enableOutline = true;
-                letterLabel.outlineColor = new Color(255, 255, 255);
+                letterLabel.outlineColor = new Color(155, 66, 1);
                 letterLabel.outlineWidth = 3;
                 letterLabel.enableShadow = true;
                 letterLabel.shadowColor = new Color(56, 56, 56);
@@ -884,6 +909,76 @@ export class MapControler extends Component {
             .start();
     }
 
+
+    /**
+     * Hiệu ứng mở ô đáp án (dùng Sprite fill mượt)
+     */
+    private showAnswerRevealEffect() {
+        if (this.indexMap !== 0) return;
+
+        const maskSprite = this.answerScrollView.getChildByPath("Effect")?.getComponent(Sprite);
+        if (!maskSprite) return;
+
+        maskSprite.fillStart = 1;
+        maskSprite.fillRange = -1;
+        const node = maskSprite.node;
+
+        Tween.stopAllByTarget(maskSprite);
+        tween(maskSprite)
+            // .delay(this.timeEffectStart)
+            .call(() => {
+                AudioController.Instance.openAnser();
+            })
+            .to(1, { fillRange: 0 }, { easing: "quadOut" })
+            .call(() => {
+                node.active = false;
+                if(this.indexMap == 0){
+                    WordSearch.Instance.initTime();
+                }
+            })
+            .start();
+    }
+
+
+    private _sequentialTick?: Function;
+    /**
+     * Chạy hiệu ứng ô xuất hiện tuần tự
+     * @param interval khoảng cách mỗi lần gọi
+    */
+    private playCellsSequentially(interval = 0.012) {
+
+        this.unschedule(this._sequentialTick as any);
+
+        const nodes: Node[] = [];
+        for (let i = 0; i < this.grid.length; i++) {
+            for (let j = 0; j < this.grid[i].length; j++) {
+                const n = this.grid[i][j].node;
+                nodes.push(n);
+            }
+        }
+
+        let current = 0;
+        this._sequentialTick = () => {
+            if (current >= nodes.length) {
+                WordSearch.Instance.waitMask.active = false;
+                this.showAnswerRevealEffect();
+                this.unschedule(this._sequentialTick as any); // tránh lặp vô hạn
+                return;
+            }
+            const node = nodes[current++];
+            node.active = true;
+            node.setScale(0.6, 0.6, 0.6);
+
+            tween(node)
+                .call(() => {
+                    if (this.indexMap == 0) AudioController.Instance.spawn();
+                })
+                .to(0.12, { scale: v3(1, 1, 1) }, { easing: 'backOut' })
+                .start();
+        };
+
+        this.schedule(this._sequentialTick as any, interval);
+    }
 
 
     //=============== CÁC HÀM TIỆN ÍCH ===============//

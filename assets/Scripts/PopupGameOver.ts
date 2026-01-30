@@ -112,7 +112,7 @@ export class PopupGameOver extends Component {
             missingPoint.active = false;
             confenti.active = true;
             labelScore.string = `LEGENDARY`;
-            bgResult.color = new Color().fromHEX(`#CECE3C`);
+            bgResult.color = new Color().fromHEX(`#FFBA1B`);
         } else if (currentScore >= percentage) {
             AudioController.Instance.gameWin();
             emoji.setAnimation(0, `FUNNY`);
@@ -121,7 +121,7 @@ export class PopupGameOver extends Component {
             missingPoint.getChildByPath(`LabelMiss`).getComponent(Label).string = `TO LEGENDARY`;
             confenti.active = true;
             labelScore.string = `COMPLETED`;
-            bgResult.color = new Color().fromHEX(`#4BB7DA`);
+            bgResult.color = new Color().fromHEX(`#29A8FF`);
         } else {
             AudioController.Instance.gameOver();
             emoji.setAnimation(0, `SAD`);

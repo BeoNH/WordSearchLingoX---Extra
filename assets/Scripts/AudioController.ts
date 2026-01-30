@@ -1,4 +1,4 @@
-import { _decorator, AudioClip, AudioSource, Component, game, Node, resources } from 'cc';
+import { _decorator, Animation, AudioClip, AudioSource, Component, game, instantiate, Node, resources } from 'cc';
 const { ccclass, property } = _decorator;
 
 resources.load<AudioClip>("Sounds/silent", (err, data) => {
@@ -57,7 +57,7 @@ export class AudioController extends Component {
     Click() {
         this.volume == 1 ? this.volume = 0 : this.volume = 1;
         // this.node.children.forEach(e => e.getComponent(AudioSource).volume = this.volume)
-        this.node.children[0].getComponent(AudioSource).volume = this.volume * 0.8;
+        this.node.children[0].getComponent(AudioSource).volume = this.volume * 0.5; // Nhạc nền
     }
 
     protected update(dt: number): void {
@@ -73,7 +73,7 @@ export class AudioController extends Component {
         this.node.getChildByName("clear").getComponent(AudioSource).play();
     }
 
-    Wrong(){
+    Wrong() {
         const parent = this.node.getChildByName("wrong");
         if (!parent || parent.children.length === 0) return;
 
@@ -111,11 +111,25 @@ export class AudioController extends Component {
     }
 
     barEnd(is: boolean) {
-        if(is){
+        if (is) {
             this.node.getChildByName("bar_end_game").getComponent(AudioSource).play();
-        }else{
+        } else {
             this.node.getChildByName("bar_end_game").getComponent(AudioSource).stop();
         }
+    }
+
+    spawn() {
+        const audio = this.node.getChildByName("spawn")?.getComponent(AudioSource);
+        if (!audio || (audio as any).playing) return;
+        audio.play();
+    }
+
+    openAnser() {
+        this.node.getChildByName("open_anser").getComponent(AudioSource).play();
+    }
+
+    hintClick() {
+        this.node.getChildByName("hint_sound").getComponent(AudioSource).play();
     }
 
 }

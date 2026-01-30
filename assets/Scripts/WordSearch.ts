@@ -126,15 +126,27 @@ export class WordSearch extends Component {
         this.updateTimeDisplay();
 
         // Chế độ chơi
-        if (GameManager.data.options.isCountdownMode) {
-            this.startTotalTimer();
-            this.startTimer();
-        }
+        // if (GameManager.data.options.isCountdownMode) {
+        //     this.scheduleOnce(() => {
+        //         //Chậm lại 1s chạy anim
+        //         this.startTotalTimer();
+        //         this.startTimer();
+        //     }, 1)
+        // }
         this.modeTimeUI.active = GameManager.data.options.isCountdownMode;
         this.modePageUI.active = !GameManager.data.options.isCountdownMode;
     }
 
-
+    initTime() {
+        // Chế độ chơi
+        if (GameManager.data.options.isCountdownMode) {
+            this.scheduleOnce(() => {
+                //Chậm lại 1s chạy anim
+                this.startTotalTimer();
+                this.startTimer();
+            }, 1)
+        }
+    }
 
     //=============== XỬ LÝ LOGIC GAME ===============//
 
@@ -216,7 +228,7 @@ export class WordSearch extends Component {
 
 
     /**
-     * Hiện thị hướng dẫn dùng gợi ý
+     * Hiện thị ngón tay hướng dẫn dùng gợi ý
      */
     public showUseHint() {
         let finger = this.node.getChildByPath(`btnHint/zhishi_tex`);
@@ -253,13 +265,13 @@ export class WordSearch extends Component {
 
         const bonusLabel = bonusNode.getComponentInChildren(Label);
         bonusLabel.string = bonus >= 0 ? `+${bonus}` : `${bonus}`;
-        bonusLabel.color = bonus >= 0 ? new Color(100, 255, 0) : new Color(255, 0, 0);
+        bonusLabel.color = bonus >= 0 ? new Color(0, 200, 0) : new Color(255, 0, 0);
         bonusLabel.isBold = true;
         bonusLabel.enableOutline = true;
         bonusLabel.outlineColor = new Color(255, 255, 255);
         bonusLabel.outlineWidth = 5;
 
-        const duration = Vec3.distance(initPos, targetPos) * 0.0005;
+        const duration = Vec3.distance(initPos, targetPos) * 0.0014; //tăng biến, giảm tốc
         console.log(duration)
         tween(bonusNode)
             .to(duration, { worldPosition: targetPos })
@@ -356,12 +368,13 @@ export class WordSearch extends Component {
 
     // Hiện thị gợi ý
     public onHintMap() {
+        AudioController.Instance.hintClick();
         if (this.numHints > 0) {
-            this.mapNodes[this.currentMapIndex].getComponent(MapControler).onHintFirstWord(() => {
+            this.mapNodes[this.currentMapIndex].getComponent(MapControler).onHintFirstWord((pos: Vec3) => {
                 this.numHints--;
                 this.node.getChildByPath(`btnHint/num`).getComponent(Label).string = `${this.numHints}`;
 
-                // hiệu ứng rơi chữ
+                // hiệu ứng rơi chữ (-1 hint)
                 const initPos = this.node.getChildByPath(`btnHint`).getWorldPosition().clone();
                 const targetPos = initPos.clone().add(v3(0, -80, 0));;
                 const minusNode = new Node("BonusEffect");
@@ -390,8 +403,9 @@ export class WordSearch extends Component {
                 // hiệu ứng phóng to icon mờ dần
                 const clone = new Node("CloneIcon");
                 clone.parent = this.node;
-                clone.setPosition(Vec3.ZERO.clone().add(v3(0, 250, 0)));
-                clone.scale = v3(10, 10, 10);
+                // clone.setPosition(Vec3.ZERO.clone().add(v3(0, 250, 0)));
+                clone.setWorldPosition(pos);
+                clone.scale = v3(3, 3, 3);
 
                 const bgClone = clone.addComponent(Sprite);
                 bgClone.spriteFrame = this.node.getChildByPath(`btnHint`).getComponent(Sprite).spriteFrame;
@@ -399,7 +413,7 @@ export class WordSearch extends Component {
 
                 tween(clone)
                     .to(
-                        0.8,
+                        0.6,
                         {
                             scale: new Vec3(0.2, 0.2, 0.2),
                             worldScale: new Vec3(0.2, 0.2, 0.2), // fallback an toàn nếu scale local

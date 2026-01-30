@@ -21,8 +21,8 @@
         "progress": 1,
         "state": "success",
         "stage": "build",
-        "message": "10-20-2025 09:58:58 build success in 18 s!",
-        "detailMessage": "// ---- build task cocos-service：onBeforeCompressSettings ----\r",
+        "message": "1-30-2026 16:39:19 build success in 20 s!",
+        "detailMessage": "// ---- build task adsense-h5g-plugin：onAfterBuild ----\r",
         "options": {
           "name": "WordSearch",
           "server": "",
@@ -83,7 +83,7 @@
             "enable": false
           }
         },
-        "time": "10-20-2025 09:58:39",
+        "time": "1-30-2026 16:38:58",
         "dirty": false
       }
     }
