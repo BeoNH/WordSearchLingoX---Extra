@@ -21,8 +21,8 @@
         "progress": 1,
         "state": "success",
         "stage": "build",
-        "message": "1-30-2026 16:39:19 build success in 20 s!",
-        "detailMessage": "// ---- build task adsense-h5g-plugin：onAfterBuild ----\r",
+        "message": "2-5-2026 13:23:07 build success in 22 s!",
+        "detailMessage": "build task(web-mobile) in 22419!\r",
         "options": {
           "name": "WordSearch",
           "server": "",
@@ -83,7 +83,7 @@
             "enable": false
           }
         },
-        "time": "1-30-2026 16:38:58",
+        "time": "2-5-2026 13:22:45",
         "dirty": false
       }
     }

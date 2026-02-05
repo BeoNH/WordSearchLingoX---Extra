@@ -3,6 +3,7 @@ import { PopupSettingLevel } from './PopupSettingLevel';
 import { PopupGameOver } from './PopupGameOver';
 import { Popup } from './Popup';
 import { PopupProgressScore } from './PopupProgressScore';
+import { PopupRank } from './PopupRank';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIControler')
@@ -13,8 +14,8 @@ export class UIControler extends Component {
     private popupInfo: Node = null;
     @property({ type: Node, tooltip: "Luật chơi" })
     private popupGuid: Node = null;
-    // @property({ type: Node, tooltip: "Bảng xếp hạng" })
-    // private popupRank: Node = null;
+    @property({ type: Node, tooltip: "Bảng xếp hạng" })
+    private popupRank: Node = null;
     // @property({ type: Node, tooltip: "Lịch sử" })
     // private popupHistory: Node = null;
     @property({ type: Node, tooltip: "Cài đặt cấp độ chơi" })
@@ -45,10 +46,10 @@ export class UIControler extends Component {
             case `guid`:
                 this.popupGuid.getComponent(Popup).onShow();
                 break;
-            // case `rank`:
-            //     this.popupRank.getComponent(Popup).onShow();
-            //     this.popupRank.getComponent(PopupRank).initRankingList();
-            //     break;
+            case `rank`:
+                this.popupRank.getComponent(Popup).onShow();
+                this.popupRank.getComponent(PopupRank).initRankingList();
+                break;
             // case `history`:
             //     this.popupHistory.getComponent(Popup).onShow();
             //     this.popupHistory.getComponent(PopupHistory).initHistoryList();
@@ -78,7 +79,7 @@ export class UIControler extends Component {
     onClose() {
         this.popupInfo.active = false;
         this.popupGuid.active = false;
-        // this.popupRank.active = false;
+        this.popupRank.active = false;
         // this.popupHistory.active = false;
         this.popupSettingLevel.active = false;
         this.popupProgressScore.active = false;

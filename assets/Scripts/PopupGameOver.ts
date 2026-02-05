@@ -81,7 +81,7 @@ export class PopupGameOver extends Component {
             this.scoreScrolling.to(score);
         }, 1.5);
 
-        this.saveScore(totalCorrect,totalTime,score);
+        this.saveScore(totalCorrect, totalTime, score);
         this.calculateSkillScores(score);
         this.calculateAchievement(score, totalQuestions);
         this.renderReport(maps);
@@ -233,7 +233,20 @@ export class PopupGameOver extends Component {
 
         APIManager.requestData('POST', `/webhook/game/user-game/`, data, res => {
             if (!res) {
-                UIControler.instance.onMess(`Loading game data failed \n. . .\n ${res?.message}`);
+                UIControler.instance.onMess(`Loading save score failed \n. . .\n ${res?.message}`);
+                return;
+            }
+        });
+
+
+        let data2 = {
+            "score": score, 
+            "total_time": Math.round(time),
+            "game_id": APIManager.GID
+        }
+        APIManager.requestData('POST', `/webhook-play/log/`, data2, res => {
+            if (!res) {
+                UIControler.instance.onMess(`Loading save score2 failed \n. . .\n ${res?.message}`);
                 return;
             }
         });
@@ -248,11 +261,11 @@ export class PopupGameOver extends Component {
 
     public async onRetry() {
         await GameControler.Instance.openGame()
-        .then(() => {
-            this.node.getComponent(Popup)?.onClose();
-        });
+            .then(() => {
+                this.node.getComponent(Popup)?.onClose();
+            });
     }
-    
+
 }
 
 
